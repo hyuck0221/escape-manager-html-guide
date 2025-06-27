@@ -130,11 +130,11 @@
 
                     // Role 별 최초 접근 화면 분기
                     if (data.role === 'SUPER_ADMIN') {
-                        window.location.href = '/center/center-list.html';
+                        window.location.href = '../center/list.html';
                     } else if (data.role === 'ADMIN') {
-                        window.location.href = '/etc/none-idea.html';
+                        window.location.href = '../etc/none-idea.html';
                     } else {
-                        window.location.href = '/center/center-list.html';
+                        window.location.href = '../center/list.html';
                     }
                 } else {
                     alert('로그인 실패: ' + (data.message || response.statusText));
