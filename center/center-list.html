@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>카페 목록 가이드</title>
+  <!-- 기본 스타일: 심플한 단색 디자인 -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 40px;
+    }
+    .container {
+      width: 800px;
+      background-color: #fff;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 28px;
+      text-align: center;
+      color: #333;
+    }
+    .search-group {
+      display: flex;
+      margin-bottom: 16px;
+    }
+    .search-group input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px 0 0 4px;
+    }
+    .search-group button {
+      padding: 8px 16px;
+      border: none;
+      background-color: #4a90e2;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 0 4px 4px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    #pageInfo {
+      margin-top: 16px;
+      text-align: right;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- 화면 제목 -->
+  <h1>카페 목록</h1>
+
+  <!-- 검색 입력 -->
+  <div class="search-group">
+    <input type="text" id="searchInput" placeholder="카페명으로 검색">
+    <button id="searchBtn">검색</button>
+  </div>
+
+  <!-- 결과 테이블 -->
+  <table>
+    <thead>
+    <tr>
+      <th>카페명</th>
+      <th>주소</th>
+      <th>전화번호</th>
+      <th>테마 수</th>
+    </tr>
+    </thead>
+    <tbody id="tableBody">
+    <!-- JavaScript로 동적으로 채워집니다 -->
+    </tbody>
+  </table>
+
+  <!-- 페이지 정보 표시 -->
+  <div id="pageInfo"></div>
+</div>
+
+<script>
+  // API 호출을 위한 기본 URL 설정
+  const BASE_URL = 'https://em-api-dev.hshim-universe.com';
+  let currentPage = 0;
+  const pageSize = 20;
+
+  // 데이터 조회 함수
+  async function fetchCenters(page, search) {
+    const params = new URLSearchParams({ page: page, size: pageSize });
+    if (search) params.append('search', search);
+    const response = await fetch(`${BASE_URL}/center/list?${params.toString()}`);
+    return await response.json();
+  }
+
+  // 테이블 렌더링 함수
+  function renderTable(content) {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+    content.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+                <td>${item.name}</td>
+                <td>${item.address || '-'}</td>
+                <td>${item.phoneNo || '-'}</td>
+                <td>${item.themeCnt}</td>
+            `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // 페이지 정보 표시
+  function renderPageInfo(pageable, totalPages) {
+    document.getElementById('pageInfo').textContent =
+            `페이지 ${pageable.pageNumber + 1} / ${totalPages}`;
+  }
+
+  // 초기 조회 및 이벤트 등록
+  async function init() {
+    const result = await fetchCenters(currentPage);
+    renderTable(result.content);
+    renderPageInfo(result.pageable, result.totalPages);
+
+    document.getElementById('searchBtn').addEventListener('click', async () => {
+      const searchValue = document.getElementById('searchInput').value.trim();
+      currentPage = 0;
+      const res = await fetchCenters(currentPage, searchValue);
+      renderTable(res.content);
+      renderPageInfo(res.pageable, res.totalPages);
+    });
+  }
+
+  // 스크립트 초기화
+  init();
+</script>
+</body>
+</html>
